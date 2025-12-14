@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coin Flipper | 3D Heads or Tails Online</title>
+    <meta name="description" content="Flip a coin online with our realistic 3D Coin Flipper. Support for US Dollar, Euro, Bitcoin and more. Ask AI to interpret your fate. The ultimate decision maker." />
+    <meta name="keywords" content="coin flipper, heads or tails, flip a coin online, random number generator, decision maker, 3d coin flip" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0f172a; /* slate-900 */
+        color: #e2e8f0; /* slate-200 */
+        overflow-x: hidden;
+      }
+      
+      /* 3D Coin Utilities */
+      .perspective-container {
+        perspective: 1200px;
+      }
+      
+      /* The trajectory wrapper (Up/Down movement) */
+      .coin-toss-wrapper {
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+      }
+      
+      .coin-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        /* Matches App.tsx timeout (2.5s) */
+        transition: transform 2.5s cubic-bezier(0.15, 0.25, 0.25, 1); 
+        transform-style: preserve-3d;
+      }
+      
+      .coin-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden; /* Hide back when facing away */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0 0 40px rgba(0,0,0,0.4), 0 0 15px rgba(0,0,0,0.3);
+        /* 3D Thickness illusion via multiple shadows could be added here, but simple is clean */
+      }
+      
+      .coin-back {
+        transform: rotateY(180deg);
+      }
+
+      /* Animations */
+      @keyframes toss-trajectory {
+        0% { transform: translateY(0) scale(1); animation-timing-function: ease-out; }
+        45% { transform: translateY(-220px) scale(1.3); animation-timing-function: ease-in; } /* Peak height */
+        75% { transform: translateY(0) scale(1); animation-timing-function: ease-out; } /* Land */
+        85% { transform: translateY(-30px) scale(1.05); animation-timing-function: ease-in; } /* Bounce */
+        100% { transform: translateY(0) scale(1); }
+      }
+
+      @keyframes shadow-breathe {
+        0% { transform: scale(1); opacity: 0.3; animation-timing-function: ease-out; }
+        45% { transform: scale(0.5); opacity: 0.1; animation-timing-function: ease-in; }
+        75% { transform: scale(1); opacity: 0.3; animation-timing-function: ease-out; }
+        85% { transform: scale(0.9); opacity: 0.2; animation-timing-function: ease-in; }
+        100% { transform: scale(1); opacity: 0.3; }
+      }
+
+      .animate-toss {
+        animation: toss-trajectory 2.5s forwards;
+      }
+
+      .animate-shadow {
+        animation: shadow-breathe 2.5s forwards;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
