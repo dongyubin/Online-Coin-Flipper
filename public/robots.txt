@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# IMPORTANT: Replace the URL below with your actual deployed domain
-Sitemap: https://your-domain.com/sitemap.xml
+Sitemap: https://coin-flipper.wwkejishe.top/sitemap.xml
