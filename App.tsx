@@ -3,7 +3,8 @@ import Coin from './components/Coin';
 import History from './components/History';
 import { LandingSections } from './components/LandingSections';
 import { CoinSide, FlipResult, CoinStats } from './types';
-import { getCoinInterpretation } from './services/geminiService';
+// import { getCoinInterpretation } from './services/geminiService'; // Disabled for Vercel deployment without API Key
+import { playFlipSound, playLandSound } from './services/audioService';
 import { COIN_TYPES } from './data/coins';
 
 const App: React.FC = () => {
@@ -14,10 +15,10 @@ const App: React.FC = () => {
   const [isFlipping, setIsFlipping] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<CoinSide>(CoinSide.HEADS);
-  const [question, setQuestion] = useState('');
+  // const [question, setQuestion] = useState(''); // Removed AI Input
   const [history, setHistory] = useState<FlipResult[]>([]);
-  const [isThinking, setIsThinking] = useState(false);
-  const [shareBtnText, setShareBtnText] = useState('Share Result');
+  // const [isThinking, setIsThinking] = useState(false); // Removed AI State
+  const [shareBtnText, setShareBtnText] = useState('Share Coin Flip');
   const [selectedCoinId, setSelectedCoinId] = useState(COIN_TYPES[0].id);
   const currentCoin = COIN_TYPES.find(c => c.id === selectedCoinId) || COIN_TYPES[0];
   const [stats, setStats] = useState<CoinStats>({
@@ -41,9 +42,11 @@ const App: React.FC = () => {
   const handleFlip = async () => {
     if (isFlipping) return;
 
+    // Start Flip Animation & Sound
     setIsFlipping(true);
-    setQuestion(q => q.trim());
-    setShareBtnText('Share Result'); 
+    playFlipSound(); // Play toss sound
+
+    setShareBtnText('Share Coin Flip'); 
     
     const isHeads = Math.random() < 0.5;
     const newSide = isHeads ? CoinSide.HEADS : CoinSide.TAILS;
@@ -59,9 +62,11 @@ const App: React.FC = () => {
 
     setRotation(finalRotation);
 
+    // Wait for animation to finish
     setTimeout(async () => {
       setResult(newSide);
       setIsFlipping(false);
+      playLandSound(); // Play landing sound
       
       updateStats(newSide);
 
@@ -69,9 +74,11 @@ const App: React.FC = () => {
         id: crypto.randomUUID(),
         side: newSide,
         timestamp: Date.now(),
-        question: question || undefined,
+        // question: question || undefined, // AI Disabled
       };
 
+      // AI Logic Disabled for Vercel/No-Backend
+      /*
       if (question) {
         setIsThinking(true);
         const interpretation = await getCoinInterpretation(newSide, question);
@@ -79,6 +86,7 @@ const App: React.FC = () => {
         setIsThinking(false);
         setQuestion('');
       }
+      */
 
       setHistory(prev => [newFlip, ...prev]);
     }, 2500);
@@ -107,13 +115,13 @@ const App: React.FC = () => {
   const handleShare = async () => {
     if (history.length === 0) return;
     const latestFlip = history[0];
-    const text = `I flipped a ${currentCoin.name} on Cosmic Coin Flipper and got ${latestFlip.side}! ${latestFlip.interpretation ? `🔮 Oracle says: "${latestFlip.interpretation}"` : ''} \n\nTry it here: ${window.location.href}`;
+    const text = `I just used the Cosmic Coin Flip and got ${latestFlip.side}! Flip a coin yourself here: ${window.location.href}`;
     
     const fallbackCopy = async () => {
       try {
         await navigator.clipboard.writeText(text);
-        setShareBtnText('Copied to Clipboard!');
-        setTimeout(() => setShareBtnText('Share Result'), 2000);
+        setShareBtnText('Copied!');
+        setTimeout(() => setShareBtnText('Share Coin Flip'), 2000);
       } catch (err) {
         console.error('Error copying:', err);
       }
@@ -121,7 +129,7 @@ const App: React.FC = () => {
 
     if (navigator.share) {
       try {
-        const shareData: ShareData = { title: 'Cosmic Coin Flipper Result', text: text };
+        const shareData: ShareData = { title: 'Coin Flip Result', text: text };
         if (window.location.protocol.startsWith('http')) {
           shareData.url = window.location.href;
         }
@@ -189,10 +197,10 @@ const App: React.FC = () => {
       <header className="w-full p-6 flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto z-10">
         <div className="text-center md:text-left mb-4 md:mb-0">
           <h1 className="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-amber-600 drop-shadow-lg">
-            Cosmic Coin Flipper
+            Cosmic Coin Flip
           </h1>
           <p className="text-slate-400 text-xs tracking-wider uppercase mt-1">
-            Utility & Probability Tool
+            The Ultimate Coin Flip Tool
           </p>
         </div>
         
@@ -204,7 +212,7 @@ const App: React.FC = () => {
               mode === 'single' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            3D Flip
+            3D Coin Flip
           </button>
           <button
             onClick={() => setMode('batch')}
@@ -242,7 +250,7 @@ const App: React.FC = () => {
             {/* Status & Share */}
             <div className="min-h-[6rem] flex flex-col items-center justify-center mb-6 space-y-3">
               {isFlipping ? (
-                <span className="text-3xl font-bold text-yellow-400 animate-pulse">Flipping...</span>
+                <span className="text-3xl font-bold text-yellow-400 animate-pulse">Coin Flip in Progress...</span>
               ) : (
                 <>
                   <div className="text-center">
@@ -273,23 +281,9 @@ const App: React.FC = () => {
 
             {/* Controls */}
             <div className="w-full max-w-md space-y-4">
-              <div className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                <input
-                  type="text"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  placeholder="Ask a question (e.g. Should I verify?)"
-                  disabled={isFlipping}
-                  className="relative w-full bg-slate-900 text-white placeholder-slate-500 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                />
-                {isThinking && (
-                  <div className="absolute right-3 top-3.5">
-                    <div className="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
-                  </div>
-                )}
-              </div>
-
+              
+              {/* Question Input Removed for Vercel/SEO Focus */}
+              
               <button
                 onClick={handleFlip}
                 disabled={isFlipping}
@@ -299,7 +293,7 @@ const App: React.FC = () => {
                     : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/30'
                   }`}
               >
-                {isFlipping ? 'FATE IS SPINNING...' : 'FLIP COIN'}
+                {isFlipping ? 'FLIPPING COIN...' : 'FLIP COIN'}
               </button>
 
               <div className="grid grid-cols-2 gap-4">
@@ -318,7 +312,7 @@ const App: React.FC = () => {
                 onClick={resetStats}
                 className="w-full text-center text-xs text-slate-500 hover:text-slate-300 underline decoration-slate-600 hover:decoration-slate-400 underline-offset-4 transition-colors"
               >
-                Reset Statistics
+                Reset Coin Flip Stats
               </button>
             </div>
             
@@ -332,7 +326,7 @@ const App: React.FC = () => {
         {/* === BATCH MODE === */}
         {mode === 'batch' && (
           <div className="flex flex-col items-center w-full animate-[fadeIn_0.5s_ease-out]">
-            <h2 className="text-xl font-bold text-slate-200 mb-6 text-center">Bulk Coin Flipper & Data Generator</h2>
+            <h2 className="text-xl font-bold text-slate-200 mb-6 text-center">Bulk Coin Flip & Data Generator</h2>
             
             <div className="grid md:grid-cols-2 gap-8 w-full max-w-4xl">
               
@@ -392,7 +386,7 @@ const App: React.FC = () => {
                     onClick={handleBatchFlip}
                     className="w-full mt-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold shadow-lg transition-all transform active:scale-[0.98]"
                   >
-                    GENERATE RESULTS
+                    GENERATE COIN FLIPS
                   </button>
                 </div>
               </div>
@@ -480,8 +474,8 @@ const App: React.FC = () => {
       </div>
       
       <footer className="w-full py-8 text-center text-slate-600 text-sm border-t border-slate-800 bg-slate-950">
-        <p>© {new Date().getFullYear()} Cosmic Coin Flipper. All rights reserved.</p>
-        <p className="mt-1 text-xs">Powered by Gemini AI • Built with React</p>
+        <p>© {new Date().getFullYear()} Cosmic Coin Flip. All rights reserved.</p>
+        <p className="mt-1 text-xs">The #1 Online Coin Flip Tool • Built with React</p>
       </footer>
     </div>
   );

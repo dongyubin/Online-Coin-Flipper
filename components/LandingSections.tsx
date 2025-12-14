@@ -7,28 +7,28 @@ export const LandingSections: React.FC = () => {
       {/* Features Section */}
       <section aria-labelledby="features-title">
         <h2 id="features-title" className="text-3xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
-          The Most Versatile Coin Flip Tool
+          The Best Online Coin Flip Tool
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 hover:border-indigo-500/50 transition duration-300">
             <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center mb-4 text-indigo-400 text-2xl">📊</div>
-            <h3 className="text-xl font-semibold mb-2 text-slate-200">Bulk Generator</h3>
+            <h3 className="text-xl font-semibold mb-2 text-slate-200">Bulk Coin Flip</h3>
             <p className="text-slate-400 leading-relaxed text-sm">
-              Need 100 or 1,000 flips? Use our Batch Mode to generate massive datasets instantly. Export to CSV or Text.
+              Need to flip a coin 100 times? Use our Batch Coin Flip mode to generate massive results instantly. Export to CSV.
             </p>
           </div>
           <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 hover:border-purple-500/50 transition duration-300">
             <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 text-purple-400 text-2xl">⚙️</div>
-            <h3 className="text-xl font-semibold mb-2 text-slate-200">Fully Custom</h3>
+            <h3 className="text-xl font-semibold mb-2 text-slate-200">Custom Coin Flip</h3>
             <p className="text-slate-400 leading-relaxed text-sm">
-              Customize your results. Replace "Heads" with "Yes/Win" and "Tails" with "No/Lose". Set your own separators.
+              Customize your coin flip. Replace "Heads" with "Yes" and "Tails" with "No". The ultimate coin flip generator.
             </p>
           </div>
           <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 hover:border-amber-500/50 transition duration-300">
             <div className="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center mb-4 text-amber-400 text-2xl">⚡</div>
-            <h3 className="text-xl font-semibold mb-2 text-slate-200">3D Realism</h3>
+            <h3 className="text-xl font-semibold mb-2 text-slate-200">3D Coin Flip</h3>
             <p className="text-slate-400 leading-relaxed text-sm">
-              For single decisions, enjoy our physics-based 3D animation with AI-powered interpretations of your fate.
+              Experience the best online 3D coin flip animation. Realistic physics make every flip of the coin feel authentic.
             </p>
           </div>
         </div>
@@ -36,26 +36,26 @@ export const LandingSections: React.FC = () => {
 
       {/* How it Works (SEO Text) */}
       <section className="bg-slate-900/50 p-8 rounded-3xl border border-slate-800">
-        <h2 className="text-2xl font-bold mb-6 text-slate-200">Practical Uses for Coin Flipper</h2>
+        <h2 className="text-2xl font-bold mb-6 text-slate-200">Why Use This Online Coin Flip?</h2>
         <div className="grid md:grid-cols-2 gap-8 text-slate-400 text-sm">
             <div>
-                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Probability Statistics</h3>
+                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Probability & Statistics</h3>
                 <p className="mb-4">
-                    Students and teachers can use the <strong className="text-indigo-400">Batch Flip</strong> feature to demonstrate the Law of Large Numbers. Run 1,000 flips and see how closely the ratio approaches 50/50.
+                    Our <strong className="text-indigo-400">Coin Flip</strong> simulator is perfect for students learning about probability. Flip a coin 1,000 times to see the law of large numbers in action.
                 </p>
-                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Game Masters & RPGs</h3>
+                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Gaming & RPGs</h3>
                 <p>
-                    Need to determine the outcome for a crowded battlefield? Generate 50 results at once with custom "Hit/Miss" text to speed up your tabletop gameplay.
+                    Need a quick heads or tails result? Our online coin flip is the fastest way to decide who goes first or determine critical hits in your favorite games.
                 </p>
             </div>
             <div>
-                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Decision Making</h3>
+                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Instant Decision Maker</h3>
                 <p className="mb-4">
-                    Stuck between two choices? Flip a coin online to break the deadlock. It's unbiased, quick, and now supports custom text for specific scenarios.
+                    Can't decide? Let the coin flip decide for you. It is a completely unbiased random number generator visualized as a simple coin toss.
                 </p>
                 <h3 className="text-slate-200 font-semibold mb-2 text-lg">Data Export</h3>
                 <p>
-                    Researchers and developers can download coin flip datasets in CSV or TXT format for use in simulations, testing algorithms, or Excel analysis.
+                    Researchers can use the bulk coin flip feature to download datasets. Generate a random sequence of heads and tails for your projects.
                 </p>
             </div>
         </div>
@@ -64,24 +64,24 @@ export const LandingSections: React.FC = () => {
       {/* FAQ Section */}
       <section aria-labelledby="faq-title">
         <h2 id="faq-title" className="text-3xl font-bold text-center mb-10 text-slate-200">
-          Frequently Asked Questions
+          Coin Flip FAQ
         </h2>
         <div className="space-y-4">
           <DetailsItem 
-            summary="How many coins can I flip at once?" 
-            content="In Batch Mode, you can flip up to 10,000 coins instantly. For the 3D animation mode, we stick to one coin at a time to ensure high-quality visual performance." 
+            summary="Is this Coin Flip truly random?" 
+            content="Yes, our Coin Flip generator uses cryptographically secure pseudo-random number generators (PRNG) to ensure every flip of the coin is 100% fair and unbiased." 
           />
           <DetailsItem 
-            summary="Can I change the output text for Heads and Tails?" 
-            content="Yes! In Batch Mode, you can define custom 'Heads Text' (e.g., 'Team A') and 'Tails Text' (e.g., 'Team B') to match your specific needs." 
+            summary="How many times can I flip a coin at once?" 
+            content="With our Batch Coin Flip feature, you can flip a coin up to 10,000 times instantly. The standard 3D Coin Flip mode flips one coin at a time for realism." 
+          />
+          <DetailsItem 
+            summary="Can I customize the Coin Flip results?" 
+            content="Absolutely. In Batch mode, you can change 'Heads' and 'Tails' to any text you want, making this a versatile decision-making tool beyond just a standard coin flip." 
           />
            <DetailsItem 
-            summary="How do I export the coin flip results?" 
-            content="After generating a batch of flips, buttons will appear allowing you to Copy to Clipboard, Download as .TXT, or Download as .CSV for spreadsheet software." 
-          />
-          <DetailsItem 
-            summary="Is the randomness truly fair?" 
-            content="Absolutely. We use cryptographically secure pseudo-random number generators (PRNG) provided by the browser to ensure every flip is unbiased." 
+            summary="Is this Online Coin Flip free?" 
+            content="Yes, this Online Coin Flip tool is completely free to use. Flip a coin as many times as you like without any restrictions." 
           />
         </div>
       </section>

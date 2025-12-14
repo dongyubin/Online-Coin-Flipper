@@ -25,6 +25,31 @@ export const COIN_TYPES: CoinDefinition[] = [
     )
   },
   {
+    id: 'cny',
+    name: 'Yuan (RMB)',
+    country: 'China',
+    frontColor: 'linear-gradient(135deg, #e2e8f0, #cbd5e1)', // Silver
+    backColor: 'linear-gradient(135deg, #e2e8f0, #94a3b8)', // Silver Darker
+    borderColor: 'border-slate-400',
+    textColor: 'text-slate-700',
+    frontContent: (
+      <div className="flex flex-col items-center">
+        <span className="text-5xl font-sans font-bold tracking-tighter">1元</span>
+        <span className="text-[10px] font-bold tracking-widest mt-1 uppercase">Yi Yuan</span>
+      </div>
+    ),
+    backContent: (
+      <div className="flex flex-col items-center justify-center h-full">
+         <span className="text-[10px] font-bold scale-75 mb-1">ZHONGGUO RENMIN YINHANG</span>
+         <div className="w-16 h-16 border-2 border-slate-400/30 rounded-full flex items-center justify-center">
+            {/* Simple Flower Representation */}
+            <div className="w-10 h-10 bg-slate-300/50 rounded-full rotate-45 transform"></div>
+         </div>
+         <span className="text-[10px] font-bold mt-2">2024</span>
+      </div>
+    )
+  },
+  {
     id: 'eur',
     name: 'Euro',
     country: 'EU',
@@ -67,7 +92,7 @@ export const COIN_TYPES: CoinDefinition[] = [
       </div>
     )
   },
-   {
+  {
     id: 'jpn',
     name: 'Yen',
     country: 'Japan',
@@ -88,4 +113,25 @@ export const COIN_TYPES: CoinDefinition[] = [
       </div>
     )
   },
+  {
+    id: 'ancient',
+    name: 'Ancient',
+    country: 'Empire',
+    frontColor: 'linear-gradient(135deg, #b45309, #78350f)', // Dark Bronze
+    backColor: 'linear-gradient(135deg, #92400e, #451a03)',
+    borderColor: 'border-orange-900',
+    textColor: 'text-orange-200',
+    frontContent: (
+      <div className="flex flex-col items-center opacity-80">
+        <div className="w-16 h-16 border-2 border-orange-400/50 rounded-full flex items-center justify-center">
+          <span className="text-4xl font-serif">♔</span>
+        </div>
+      </div>
+    ),
+    backContent: (
+      <div className="flex flex-col items-center opacity-80">
+        <span className="text-3xl">⚔️</span>
+      </div>
+    )
+  }
 ];
