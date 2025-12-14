@@ -7,6 +7,10 @@ import { getCoinInterpretation } from './services/geminiService';
 import { COIN_TYPES } from './data/coins';
 
 const App: React.FC = () => {
+  // Mode State: 'single' | 'batch'
+  const [mode, setMode] = useState<'single' | 'batch'>('single');
+
+  // Single Flip State
   const [isFlipping, setIsFlipping] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<CoinSide>(CoinSide.HEADS);
@@ -14,12 +18,8 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<FlipResult[]>([]);
   const [isThinking, setIsThinking] = useState(false);
   const [shareBtnText, setShareBtnText] = useState('Share Result');
-  
-  // Coin Selection State
   const [selectedCoinId, setSelectedCoinId] = useState(COIN_TYPES[0].id);
   const currentCoin = COIN_TYPES.find(c => c.id === selectedCoinId) || COIN_TYPES[0];
-
-  // Stats
   const [stats, setStats] = useState<CoinStats>({
     heads: 0,
     tails: 0,
@@ -28,34 +28,37 @@ const App: React.FC = () => {
     streakSide: null
   });
 
+  // Batch Flip State
+  const [batchCount, setBatchCount] = useState<number>(10);
+  const [customHeads, setCustomHeads] = useState<string>('Heads');
+  const [customTails, setCustomTails] = useState<string>('Tails');
+  const [separator, setSeparator] = useState<string>(', ');
+  const [batchResults, setBatchResults] = useState<CoinSide[]>([]);
+  const [batchStats, setBatchStats] = useState({ heads: 0, tails: 0 });
+  const [copyFeedback, setCopyFeedback] = useState('');
+
+  // --- Single Flip Logic ---
   const handleFlip = async () => {
     if (isFlipping) return;
 
     setIsFlipping(true);
     setQuestion(q => q.trim());
-    setShareBtnText('Share Result'); // Reset share button text
+    setShareBtnText('Share Result'); 
     
-    // 1. Determine Result immediately
     const isHeads = Math.random() < 0.5;
     const newSide = isHeads ? CoinSide.HEADS : CoinSide.TAILS;
     
-    // 2. Calculate Rotation
-    // Increase spins to 10-20 to make it look faster/blurrier during the high toss
+    // Rotation logic
     const spins = 10 + Math.floor(Math.random() * 10); 
     const baseRotation = rotation + (spins * 360);
-    
     const currentMod = baseRotation % 360;
     const targetMod = isHeads ? 0 : 180;
-    
     let adjustment = targetMod - currentMod;
     if (adjustment < 0) adjustment += 360; 
-    
     const finalRotation = baseRotation + adjustment;
 
     setRotation(finalRotation);
 
-    // 3. Wait for animation
-    // Synced with CSS transition: 2500ms
     setTimeout(async () => {
       setResult(newSide);
       setIsFlipping(false);
@@ -81,45 +84,6 @@ const App: React.FC = () => {
     }, 2500);
   };
 
-  const handleShare = async () => {
-    if (history.length === 0) return;
-    
-    const latestFlip = history[0];
-    const text = `I flipped a ${currentCoin.name} on Cosmic Coin Flipper and got ${latestFlip.side}! ${latestFlip.interpretation ? `🔮 Oracle says: "${latestFlip.interpretation}"` : ''} \n\nTry it here: ${window.location.href}`;
-    
-    const fallbackCopy = async () => {
-      try {
-        await navigator.clipboard.writeText(text);
-        setShareBtnText('Copied to Clipboard!');
-        setTimeout(() => setShareBtnText('Share Result'), 2000);
-      } catch (err) {
-        console.error('Error copying to clipboard:', err);
-      }
-    };
-
-    if (navigator.share) {
-      try {
-        const shareData: ShareData = {
-          title: 'Cosmic Coin Flipper Result',
-          text: text,
-        };
-
-        // Only add URL if it is a standard http/https URL to avoid "Invalid URL" errors
-        if (window.location.protocol.startsWith('http')) {
-          shareData.url = window.location.href;
-        }
-
-        await navigator.share(shareData);
-      } catch (err) {
-        console.error('Error sharing:', err);
-        // Fallback to clipboard if share fails (e.g. invalid URL or user cancelled)
-        await fallbackCopy();
-      }
-    } else {
-      await fallbackCopy();
-    }
-  };
-
   const updateStats = (side: CoinSide) => {
     setStats(prev => {
       const isStreakContinued = prev.streakSide === side;
@@ -140,131 +104,373 @@ const App: React.FC = () => {
     setResult(CoinSide.HEADS);
   };
 
+  const handleShare = async () => {
+    if (history.length === 0) return;
+    const latestFlip = history[0];
+    const text = `I flipped a ${currentCoin.name} on Cosmic Coin Flipper and got ${latestFlip.side}! ${latestFlip.interpretation ? `🔮 Oracle says: "${latestFlip.interpretation}"` : ''} \n\nTry it here: ${window.location.href}`;
+    
+    const fallbackCopy = async () => {
+      try {
+        await navigator.clipboard.writeText(text);
+        setShareBtnText('Copied to Clipboard!');
+        setTimeout(() => setShareBtnText('Share Result'), 2000);
+      } catch (err) {
+        console.error('Error copying:', err);
+      }
+    };
+
+    if (navigator.share) {
+      try {
+        const shareData: ShareData = { title: 'Cosmic Coin Flipper Result', text: text };
+        if (window.location.protocol.startsWith('http')) {
+          shareData.url = window.location.href;
+        }
+        await navigator.share(shareData);
+      } catch (err) {
+        await fallbackCopy();
+      }
+    } else {
+      await fallbackCopy();
+    }
+  };
+
+  // --- Batch Flip Logic ---
+  const handleBatchFlip = () => {
+    const newResults: CoinSide[] = [];
+    let h = 0;
+    let t = 0;
+    const count = Math.min(Math.max(1, batchCount), 10000); // Limit to 10k
+
+    for (let i = 0; i < count; i++) {
+      if (Math.random() < 0.5) {
+        newResults.push(CoinSide.HEADS);
+        h++;
+      } else {
+        newResults.push(CoinSide.TAILS);
+        t++;
+      }
+    }
+    setBatchResults(newResults);
+    setBatchStats({ heads: h, tails: t });
+  };
+
+  const getFormattedBatchOutput = () => {
+    return batchResults
+      .map(r => r === CoinSide.HEADS ? customHeads : customTails)
+      .join(separator.replace(/\\n/g, '\n')); // Allow \n for newline
+  };
+
+  const copyBatchResults = async () => {
+    try {
+      await navigator.clipboard.writeText(getFormattedBatchOutput());
+      setCopyFeedback('Copied!');
+      setTimeout(() => setCopyFeedback(''), 2000);
+    } catch (e) {
+      setCopyFeedback('Error');
+    }
+  };
+
+  const downloadFile = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white overflow-y-auto">
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white overflow-y-auto font-sans">
       
-      {/* Navbar / Header */}
+      {/* Header */}
       <header className="w-full p-6 flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto z-10">
-        <div className="text-center md:text-left">
+        <div className="text-center md:text-left mb-4 md:mb-0">
           <h1 className="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-amber-600 drop-shadow-lg">
             Cosmic Coin Flipper
           </h1>
           <p className="text-slate-400 text-xs tracking-wider uppercase mt-1">
-            The Ultimate Decision Maker
+            Utility & Probability Tool
           </p>
         </div>
         
-        {/* Coin Selector */}
-        <div className="mt-4 md:mt-0 relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
-          <select 
-            value={selectedCoinId}
-            onChange={(e) => setSelectedCoinId(e.target.value)}
-            disabled={isFlipping}
-            className="relative bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-48 p-2.5 cursor-pointer hover:bg-slate-800 transition-colors"
+        {/* Mode Switcher */}
+        <div className="flex bg-slate-900/50 p-1 rounded-lg border border-slate-700">
+          <button
+            onClick={() => setMode('single')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+              mode === 'single' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'
+            }`}
           >
-            {COIN_TYPES.map(coin => (
-              <option key={coin.id} value={coin.id}>{coin.name} ({coin.country})</option>
-            ))}
-          </select>
+            3D Flip
+          </button>
+          <button
+            onClick={() => setMode('batch')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+              mode === 'batch' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Batch Flip
+          </button>
         </div>
       </header>
 
-      <main className="flex flex-col items-center w-full max-w-2xl z-10 pt-8 pb-20">
+      <main className="flex flex-col items-center w-full max-w-4xl z-10 pt-4 pb-20 px-4">
         
-        {/* Coin Component */}
-        <Coin isFlipping={isFlipping} result={result} rotation={rotation} coinDef={currentCoin} />
+        {/* === SINGLE MODE === */}
+        {mode === 'single' && (
+          <div className="flex flex-col items-center w-full max-w-2xl">
+            {/* Coin Selector */}
+             <div className="mb-6 relative group z-20">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
+              <select 
+                value={selectedCoinId}
+                onChange={(e) => setSelectedCoinId(e.target.value)}
+                disabled={isFlipping}
+                className="relative bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-48 p-2.5 cursor-pointer hover:bg-slate-800 transition-colors"
+              >
+                {COIN_TYPES.map(coin => (
+                  <option key={coin.id} value={coin.id}>{coin.name} ({coin.country})</option>
+                ))}
+              </select>
+            </div>
 
-        {/* Status Text & Share */}
-        <div className="min-h-[8rem] flex flex-col items-center justify-center mb-6 space-y-3">
-          {isFlipping ? (
-            <span className="text-3xl font-bold text-yellow-400 animate-pulse">Flipping...</span>
-          ) : (
-            <>
-              <div className="text-center">
-                <span className="text-5xl font-black tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
-                  {result}
-                </span>
-                {stats.currentStreak > 2 && (
-                  <div className="text-xs text-orange-400 font-bold mt-1 uppercase tracking-widest animate-bounce">
-                    🔥 {stats.currentStreak} Streak!
+            <Coin isFlipping={isFlipping} result={result} rotation={rotation} coinDef={currentCoin} />
+
+            {/* Status & Share */}
+            <div className="min-h-[6rem] flex flex-col items-center justify-center mb-6 space-y-3">
+              {isFlipping ? (
+                <span className="text-3xl font-bold text-yellow-400 animate-pulse">Flipping...</span>
+              ) : (
+                <>
+                  <div className="text-center">
+                    <span className="text-5xl font-black tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+                      {result}
+                    </span>
+                    {stats.currentStreak > 2 && (
+                      <div className="text-xs text-orange-400 font-bold mt-1 uppercase tracking-widest animate-bounce">
+                        🔥 {stats.currentStreak} Streak!
+                      </div>
+                    )}
+                  </div>
+                  
+                  {stats.total > 0 && (
+                    <button 
+                      onClick={handleShare}
+                      className="flex items-center space-x-2 px-4 py-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-sm text-indigo-300 transition-all hover:scale-105"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                      <span>{shareBtnText}</span>
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Controls */}
+            <div className="w-full max-w-md space-y-4">
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                <input
+                  type="text"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="Ask a question (e.g. Should I verify?)"
+                  disabled={isFlipping}
+                  className="relative w-full bg-slate-900 text-white placeholder-slate-500 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                />
+                {isThinking && (
+                  <div className="absolute right-3 top-3.5">
+                    <div className="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
                   </div>
                 )}
               </div>
-              
-              {stats.total > 0 && (
-                 <button 
-                  onClick={handleShare}
-                  className="flex items-center space-x-2 px-4 py-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-sm text-indigo-300 transition-all hover:scale-105"
-                 >
-                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                   </svg>
-                   <span>{shareBtnText}</span>
-                 </button>
-              )}
-            </>
-          )}
-        </div>
 
-        {/* Controls */}
-        <div className="w-full max-w-md space-y-4 px-4">
-          
-          {/* Question Input */}
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-            <input
-              type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Ask a question (e.g. Should I verify?)"
-              disabled={isFlipping}
-              className="relative w-full bg-slate-900 text-white placeholder-slate-500 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            />
-            {isThinking && (
-              <div className="absolute right-3 top-3.5">
-                <div className="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
+              <button
+                onClick={handleFlip}
+                disabled={isFlipping}
+                className={`w-full relative group py-4 rounded-xl font-bold text-lg tracking-wider transition-all transform active:scale-[0.98]
+                  ${isFlipping 
+                    ? 'bg-slate-700 text-slate-500 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/30'
+                  }`}
+              >
+                {isFlipping ? 'FATE IS SPINNING...' : 'FLIP COIN'}
+              </button>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center">
+                  <div className="text-xs text-slate-400 uppercase">Heads</div>
+                  <div className="text-xl font-bold text-yellow-400">{stats.heads}</div>
+                  <div className="text-[10px] text-slate-500">{stats.total > 0 ? ((stats.heads / stats.total) * 100).toFixed(0) : 0}%</div>
+                </div>
+                <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center">
+                  <div className="text-xs text-slate-400 uppercase">Tails</div>
+                  <div className="text-xl font-bold text-slate-300">{stats.tails}</div>
+                  <div className="text-[10px] text-slate-500">{stats.total > 0 ? ((stats.tails / stats.total) * 100).toFixed(0) : 0}%</div>
+                </div>
               </div>
-            )}
-          </div>
-
-          <button
-            onClick={handleFlip}
-            disabled={isFlipping}
-            className={`w-full relative group py-4 rounded-xl font-bold text-lg tracking-wider transition-all transform active:scale-[0.98]
-              ${isFlipping 
-                ? 'bg-slate-700 text-slate-500 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/30'
-              }`}
-          >
-            {isFlipping ? 'FATE IS SPINNING...' : 'FLIP COIN'}
-          </button>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center">
-              <div className="text-xs text-slate-400 uppercase">Heads</div>
-              <div className="text-xl font-bold text-yellow-400">{stats.heads}</div>
-              <div className="text-[10px] text-slate-500">{stats.total > 0 ? ((stats.heads / stats.total) * 100).toFixed(0) : 0}%</div>
+               <button 
+                onClick={resetStats}
+                className="w-full text-center text-xs text-slate-500 hover:text-slate-300 underline decoration-slate-600 hover:decoration-slate-400 underline-offset-4 transition-colors"
+              >
+                Reset Statistics
+              </button>
             </div>
-            <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center">
-              <div className="text-xs text-slate-400 uppercase">Tails</div>
-              <div className="text-xl font-bold text-slate-300">{stats.tails}</div>
-              <div className="text-[10px] text-slate-500">{stats.total > 0 ? ((stats.tails / stats.total) * 100).toFixed(0) : 0}%</div>
+            
+             {/* History Feed */}
+            <div className="w-full">
+                <History history={history} />
             </div>
           </div>
+        )}
 
-          <button 
-            onClick={resetStats}
-            className="w-full text-xs text-slate-500 hover:text-slate-300 underline decoration-slate-600 hover:decoration-slate-400 underline-offset-4 transition-colors"
-          >
-            Reset Statistics
-          </button>
-        </div>
+        {/* === BATCH MODE === */}
+        {mode === 'batch' && (
+          <div className="flex flex-col items-center w-full animate-[fadeIn_0.5s_ease-out]">
+            <h2 className="text-xl font-bold text-slate-200 mb-6 text-center">Bulk Coin Flipper & Data Generator</h2>
+            
+            <div className="grid md:grid-cols-2 gap-8 w-full max-w-4xl">
+              
+              {/* Settings Panel */}
+              <div className="bg-slate-800/60 p-6 rounded-2xl border border-slate-700 h-fit">
+                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-700 pb-2">Configuration</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1">Number of Flips (Max 10,000)</label>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="10000"
+                      value={batchCount}
+                      onChange={(e) => setBatchCount(parseInt(e.target.value) || 0)}
+                      className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
 
-        {/* History Feed */}
-        <div className="w-full px-4">
-            <History history={history} />
-        </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-400 mb-1">Heads Text</label>
+                      <input 
+                        type="text" 
+                        value={customHeads}
+                        onChange={(e) => setCustomHeads(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        placeholder="Heads"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-400 mb-1">Tails Text</label>
+                      <input 
+                        type="text" 
+                        value={customTails}
+                        onChange={(e) => setCustomTails(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        placeholder="Tails"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1">Separator</label>
+                    <input 
+                      type="text" 
+                      value={separator}
+                      onChange={(e) => setSeparator(e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono text-sm"
+                      placeholder=", "
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">Tip: Use <code>\n</code> for new lines.</p>
+                  </div>
+
+                  <button
+                    onClick={handleBatchFlip}
+                    className="w-full mt-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold shadow-lg transition-all transform active:scale-[0.98]"
+                  >
+                    GENERATE RESULTS
+                  </button>
+                </div>
+              </div>
+
+              {/* Results Panel */}
+              <div className="flex flex-col space-y-4">
+                
+                {/* Stats Summary */}
+                {batchResults.length > 0 && (
+                   <div className="grid grid-cols-3 gap-2">
+                     <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center">
+                        <div className="text-[10px] text-slate-400 uppercase">Total</div>
+                        <div className="text-lg font-bold text-white">{batchResults.length}</div>
+                     </div>
+                     <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center">
+                        <div className="text-[10px] text-slate-400 uppercase">{customHeads}</div>
+                        <div className="text-lg font-bold text-yellow-400">{batchStats.heads}</div>
+                        <div className="text-[9px] text-slate-500">{((batchStats.heads/batchResults.length)*100).toFixed(1)}%</div>
+                     </div>
+                     <div className="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center">
+                        <div className="text-[10px] text-slate-400 uppercase">{customTails}</div>
+                        <div className="text-lg font-bold text-slate-300">{batchStats.tails}</div>
+                        <div className="text-[9px] text-slate-500">{((batchStats.tails/batchResults.length)*100).toFixed(1)}%</div>
+                     </div>
+                   </div>
+                )}
+
+                {/* Output Area */}
+                <div className="flex-1 bg-slate-950 rounded-2xl border border-slate-700 relative overflow-hidden min-h-[300px] flex flex-col">
+                  <div className="absolute top-0 left-0 right-0 bg-slate-900/90 border-b border-slate-800 p-2 flex justify-between items-center px-4">
+                    <span className="text-xs font-mono text-slate-400">results.txt</span>
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={copyBatchResults}
+                        className="text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700 transition-colors"
+                      >
+                        {copyFeedback || 'Copy'}
+                      </button>
+                    </div>
+                  </div>
+                  <textarea 
+                    readOnly
+                    value={getFormattedBatchOutput()}
+                    className="w-full h-full bg-transparent p-4 pt-12 text-slate-300 font-mono text-xs md:text-sm resize-none focus:outline-none"
+                  />
+                </div>
+
+                {/* Export Buttons */}
+                {batchResults.length > 0 && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <button 
+                      onClick={() => downloadFile(getFormattedBatchOutput(), 'coin-flip-results.txt', 'text/plain')}
+                      className="flex items-center justify-center space-x-2 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm text-slate-300 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      <span>Download .TXT</span>
+                    </button>
+                    <button 
+                      onClick={() => {
+                        // Create CSV content: Header then Data
+                        const csvContent = `Flip Number,Result\n` + batchResults.map((r, i) => `${i+1},${r === CoinSide.HEADS ? customHeads : customTails}`).join('\n');
+                        downloadFile(csvContent, 'coin-flip-results.csv', 'text/csv');
+                      }}
+                      className="flex items-center justify-center space-x-2 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm text-slate-300 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>Download CSV</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
       </main>
 

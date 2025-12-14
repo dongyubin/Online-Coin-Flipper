@@ -7,28 +7,28 @@ export const LandingSections: React.FC = () => {
       {/* Features Section */}
       <section aria-labelledby="features-title">
         <h2 id="features-title" className="text-3xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
-          Why Use Cosmic Coin Flipper?
+          The Most Versatile Coin Flip Tool
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 hover:border-indigo-500/50 transition duration-300">
-            <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center mb-4 text-indigo-400 text-2xl">⚡</div>
-            <h3 className="text-xl font-semibold mb-2 text-slate-200">Instant & Fair</h3>
-            <p className="text-slate-400 leading-relaxed">
-              True randomness powered by cryptographically secure algorithms. No bias, just pure physics simulation.
+            <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center mb-4 text-indigo-400 text-2xl">📊</div>
+            <h3 className="text-xl font-semibold mb-2 text-slate-200">Bulk Generator</h3>
+            <p className="text-slate-400 leading-relaxed text-sm">
+              Need 100 or 1,000 flips? Use our Batch Mode to generate massive datasets instantly. Export to CSV or Text.
             </p>
           </div>
           <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 hover:border-purple-500/50 transition duration-300">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 text-purple-400 text-2xl">🤖</div>
-            <h3 className="text-xl font-semibold mb-2 text-slate-200">AI Interpretations</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Ask a question and let our Gemini-powered AI oracle interpret the coin toss for your specific dilemma.
+            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 text-purple-400 text-2xl">⚙️</div>
+            <h3 className="text-xl font-semibold mb-2 text-slate-200">Fully Custom</h3>
+            <p className="text-slate-400 leading-relaxed text-sm">
+              Customize your results. Replace "Heads" with "Yes/Win" and "Tails" with "No/Lose". Set your own separators.
             </p>
           </div>
           <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 hover:border-amber-500/50 transition duration-300">
-            <div className="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center mb-4 text-amber-400 text-2xl">🌍</div>
-            <h3 className="text-xl font-semibold mb-2 text-slate-200">Global Currencies</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Flip the US Dollar, Euro, or even Bitcoin. Visualize your luck in your preferred currency style.
+            <div className="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center mb-4 text-amber-400 text-2xl">⚡</div>
+            <h3 className="text-xl font-semibold mb-2 text-slate-200">3D Realism</h3>
+            <p className="text-slate-400 leading-relaxed text-sm">
+              For single decisions, enjoy our physics-based 3D animation with AI-powered interpretations of your fate.
             </p>
           </div>
         </div>
@@ -36,13 +36,29 @@ export const LandingSections: React.FC = () => {
 
       {/* How it Works (SEO Text) */}
       <section className="bg-slate-900/50 p-8 rounded-3xl border border-slate-800">
-        <h2 className="text-2xl font-bold mb-6 text-slate-200">How to Flip a Coin Online</h2>
-        <ol className="list-decimal list-inside space-y-4 text-slate-400">
-          <li><strong className="text-slate-300">Select your coin:</strong> Choose between USD, Euro, Yen, or Bitcoin from the dropdown menu.</li>
-          <li><strong className="text-slate-300">Ask a question (Optional):</strong> Type in a yes/no question to get an AI interpretation.</li>
-          <li><strong className="text-slate-300">Click Flip:</strong> Tap the button or click the coin to start the 3D animation.</li>
-          <li><strong className="text-slate-300">See the result:</strong> View your Heads or Tails result and read the cosmic advice.</li>
-        </ol>
+        <h2 className="text-2xl font-bold mb-6 text-slate-200">Practical Uses for Coin Flipper</h2>
+        <div className="grid md:grid-cols-2 gap-8 text-slate-400 text-sm">
+            <div>
+                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Probability Statistics</h3>
+                <p className="mb-4">
+                    Students and teachers can use the <strong className="text-indigo-400">Batch Flip</strong> feature to demonstrate the Law of Large Numbers. Run 1,000 flips and see how closely the ratio approaches 50/50.
+                </p>
+                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Game Masters & RPGs</h3>
+                <p>
+                    Need to determine the outcome for a crowded battlefield? Generate 50 results at once with custom "Hit/Miss" text to speed up your tabletop gameplay.
+                </p>
+            </div>
+            <div>
+                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Decision Making</h3>
+                <p className="mb-4">
+                    Stuck between two choices? Flip a coin online to break the deadlock. It's unbiased, quick, and now supports custom text for specific scenarios.
+                </p>
+                <h3 className="text-slate-200 font-semibold mb-2 text-lg">Data Export</h3>
+                <p>
+                    Researchers and developers can download coin flip datasets in CSV or TXT format for use in simulations, testing algorithms, or Excel analysis.
+                </p>
+            </div>
+        </div>
       </section>
 
       {/* FAQ Section */}
@@ -52,20 +68,20 @@ export const LandingSections: React.FC = () => {
         </h2>
         <div className="space-y-4">
           <DetailsItem 
-            summary="Is this coin flipper truly random?" 
-            content="Yes! We use the browser's crypto.randomUUID() and Math.random() functions to ensure the result is as unpredictable as a real coin toss." 
+            summary="How many coins can I flip at once?" 
+            content="In Batch Mode, you can flip up to 10,000 coins instantly. For the 3D animation mode, we stick to one coin at a time to ensure high-quality visual performance." 
           />
           <DetailsItem 
-            summary="What is the probability of Heads or Tails?" 
-            content="Just like a real physical coin, the probability is exactly 50/50 over a large number of flips. It is an unbiased Bernoulli trial." 
-          />
-          <DetailsItem 
-            summary="Can I use this for settling disputes?" 
-            content="Absolutely. Our Coin Flipper is unbiased and can be used to settle bets, make decisions, or resolve disputes fairly." 
+            summary="Can I change the output text for Heads and Tails?" 
+            content="Yes! In Batch Mode, you can define custom 'Heads Text' (e.g., 'Team A') and 'Tails Text' (e.g., 'Team B') to match your specific needs." 
           />
            <DetailsItem 
-            summary="Is the AI advice real fortune telling?" 
-            content="The AI generates fun, witty responses based on your coin flip result. While entertaining, it should be used for fun and not major life decisions!" 
+            summary="How do I export the coin flip results?" 
+            content="After generating a batch of flips, buttons will appear allowing you to Copy to Clipboard, Download as .TXT, or Download as .CSV for spreadsheet software." 
+          />
+          <DetailsItem 
+            summary="Is the randomness truly fair?" 
+            content="Absolutely. We use cryptographically secure pseudo-random number generators (PRNG) provided by the browser to ensure every flip is unbiased." 
           />
         </div>
       </section>
