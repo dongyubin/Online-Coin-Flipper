@@ -1,7 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { CoinSide } from "../types";
 
-const apiKey = process.env.API_KEY; // Assumes injected by environment
+// NOTE: process.env is removed to prevent "process is not defined" crashes in browser/Vercel deployments
+// Since AI features are disabled in the UI, we don't need the key active here.
+const apiKey = ''; // process.env.API_KEY; 
 let ai: GoogleGenAI | null = null;
 
 if (apiKey) {
